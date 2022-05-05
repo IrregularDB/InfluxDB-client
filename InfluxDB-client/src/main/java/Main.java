@@ -25,6 +25,11 @@ public class Main {
 
 
     public static void main(String[] args) {
+        ingestCSV(args);
+    }
+
+
+    private static void ingestCSV(String[] args) {
         File sourceDirectory = new File(args[0]);
 
         if (args[1] == null) {
