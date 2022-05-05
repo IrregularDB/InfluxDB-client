@@ -34,10 +34,6 @@ public class Main {
             delimiter = args[1];
         }
 
-        if (!sourceDirectory.isDirectory()){
-            throw new IllegalArgumentException("First argument is not a directory");
-        }
-
         InfluxDBClient influxDBClient = InfluxDBClientFactory.create("http://localhost:8086", token, org, bucket);
 
         writeApi = influxDBClient.getWriteApiBlocking();
@@ -70,12 +66,14 @@ public class Main {
         FileReader fileReader = new FileReader(file);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
 
+        String measurement = filePathNameMap.get(file.getAbsolutePath());
+
         String fileLine;
         // Run through file
         while ((fileLine = bufferedReader.readLine()) != null){
             String[] splitLine = fileLine.split(delimiter);
             if (splitLine.length == 2){
-                writeDataPointToInflux(filePathNameMap.get(file.getAbsolutePath()), splitLine[0].trim(), splitLine[1].trim());
+                writeDataPointToInflux(measurement, splitLine[0].trim(), splitLine[1].trim());
             } else {
                 writeDataPointToInflux(splitLine[0].trim(), splitLine[1].trim(), splitLine[2].trim());
             }
@@ -98,14 +96,16 @@ public class Main {
         File[] subFiles = sourceDirectory.listFiles();
 
         if (subFiles == null){
+            if (sourceDirectory.isFile())
+                csvFiles.add(sourceDirectory);
             return csvFiles;
         }
 
         for (File file : subFiles){
             if (file.isDirectory()){
-                csvFiles.addAll(getCsvFiles(file, filePath + file.getName()));
+                csvFiles.addAll(getCsvFiles(file, filePath + "/" + file.getName()));
             } else if (file.isFile()) {
-                filePathNameMap.put(file.getAbsolutePath(), filePath);
+                filePathNameMap.put(file.getAbsolutePath(), filePath + "/" + file.getName());
                 csvFiles.add(file);
             }
         }
