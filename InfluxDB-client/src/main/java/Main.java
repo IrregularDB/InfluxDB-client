@@ -87,11 +87,11 @@ public class Main {
 
 
     private static void writeDataPointToInflux(String measurement, String timestamp, String value) {
-        Point point = Point.measurement(measurement)
+        String point = Point.measurement(measurement)
                 .addField("value", Double.parseDouble(value))
-                .time(Long.parseLong(timestamp), WritePrecision.MS);
+                .time(Long.parseLong(timestamp), WritePrecision.MS).toLineProtocol();
 
-        writeApi.writePoint(point);
+        writeApi.writeRecord(WritePrecision.MS, point);
     }
 
 
