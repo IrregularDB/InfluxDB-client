@@ -46,8 +46,11 @@ public class Main {
 
         List<File> csvFiles = getCsvFiles(sourceDirectory, "");
 
+        Stopwatch.setInitialStartTime();
         writeCsvDataToInfluxDB(csvFiles);
+        Stopwatch.setEndTime();
 
+        System.out.println("Time to ingest: " + Stopwatch.getTime());
         influxDBClient.close();
     }
 
