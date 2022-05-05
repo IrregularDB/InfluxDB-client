@@ -1,12 +1,11 @@
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
-import com.influxdb.client.WriteApiBlocking;
+import com.influxdb.client.WriteApi;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,9 +18,11 @@ public class Main {
     private static final String org = "testorg";
     private static final String bucket = "testbucket";
 
+    private static final List<String> recordBatch = new ArrayList<>();
+
     private static String delimiter;
     private static final Map<String, String> filePathNameMap = new HashMap<>();
-    private static WriteApiBlocking writeApi;
+    private static WriteApi writeApi;
 
 
     public static void main(String[] args) {
@@ -41,7 +42,7 @@ public class Main {
 
         InfluxDBClient influxDBClient = InfluxDBClientFactory.create("http://localhost:8086", token, org, bucket);
 
-        writeApi = influxDBClient.getWriteApiBlocking();
+        writeApi = influxDBClient.makeWriteApi();
 
         List<File> csvFiles = getCsvFiles(sourceDirectory, "");
 
@@ -91,7 +92,13 @@ public class Main {
                 .addField("value", Double.parseDouble(value))
                 .time(Long.parseLong(timestamp), WritePrecision.MS).toLineProtocol();
 
-        writeApi.writeRecord(WritePrecision.MS, point);
+        // Do batching
+        if (recordBatch.size() == 5000) {
+            writeApi.writeRecords(WritePrecision.MS, recordBatch);
+            recordBatch.clear();
+        } else {
+            recordBatch.add(point);
+        }
     }
 
 
