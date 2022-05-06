@@ -7,10 +7,7 @@ import com.influxdb.client.write.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
 
@@ -50,6 +47,9 @@ public class Main {
         writeApi = influxDBClient.makeWriteApi();
 
         List<File> csvFiles = getCsvFiles(sourceDirectory, "");
+
+        System.out.println("Printing CSV files:");
+        System.out.println(csvFiles);
 
         Stopwatch.setInitialStartTime();
         writeCsvDataToInfluxDB(csvFiles);
