@@ -33,11 +33,16 @@ public class Main {
     private static void ingestCSV(String[] args) {
         File sourceDirectory = new File(args[0]);
 
-        if (args[1] == null) {
-            System.out.println("Defaulting to sep=\",\"");
-            delimiter = ",";
+        if (args.length > 1){
+            if (args[1] == null) {
+                System.out.println("Defaulting to sep=\" \"");
+                delimiter = " ";
+            } else {
+                delimiter = args[1];
+            }
         } else {
-            delimiter = args[1];
+            System.out.println("Defaulting to sep=\" \"");
+            delimiter = " ";
         }
 
         InfluxDBClient influxDBClient = InfluxDBClientFactory.create("http://localhost:8086", token, org, bucket);
