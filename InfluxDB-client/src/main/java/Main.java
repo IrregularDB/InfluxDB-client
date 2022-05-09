@@ -1,6 +1,7 @@
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
+import com.influxdb.client.WriteApiBlocking;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 
@@ -19,7 +20,7 @@ public class Main {
 
     private static String delimiter;
     private static final Map<String, String> filePathNameMap = new HashMap<>();
-    private static WriteApi writeApi;
+    private static WriteApiBlocking writeApi;
 
 
     public static void main(String[] args) {
@@ -44,7 +45,7 @@ public class Main {
 
         InfluxDBClient influxDBClient = InfluxDBClientFactory.create("http://localhost:8086", token, org, bucket);
 
-        writeApi = influxDBClient.makeWriteApi();
+        writeApi = influxDBClient.getWriteApiBlocking();
 
         List<File> csvFiles = getCsvFiles(sourceDirectory, "");
 
@@ -101,11 +102,10 @@ public class Main {
                 .time(Long.parseLong(timestamp), WritePrecision.MS).toLineProtocol();
 
         // Do batching
-        if (recordBatch.size() == 5000) {
+        recordBatch.add(point);
+        if (recordBatch.size() == 100000) {
             writeApi.writeRecords(WritePrecision.MS, recordBatch);
             recordBatch.clear();
-        } else {
-            recordBatch.add(point);
         }
     }
 
