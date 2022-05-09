@@ -11,9 +11,9 @@ import java.util.*;
 
 public class Main {
 
-    private static final char[] token = "iHrZtzcEfRCA2TTgWTTMPlhVbyvLZov78L9cKzZp3eB_VcZOOXm10DEzpcDAcv35txGJU2wo9bNM0pLva0F5fg==".toCharArray();
-    private static final String org = "testorg";
-    private static final String bucket = "testbucket";
+    private static final char[] token = "NrWTfM9a5Pmg-45DOUJawRKwNrUVQGFUBSNBKqyM1-jYuVsmNBKIXHMOI2ztNbluXG79wEBjXLvI_dbnkhKQbg==".toCharArray();
+    private static final String org = "p10";
+    private static final String bucket = "irregularbucket";
 
     private static final List<String> recordBatch = new ArrayList<>();
 
