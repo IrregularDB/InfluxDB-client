@@ -3,6 +3,7 @@ import com.influxdb.client.InfluxDBClientFactory;
 import com.influxdb.client.WriteApi;
 import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -68,11 +69,7 @@ public class Main {
             } else {
                 while (maxNumberOfConcurrentThreads == workerThreads.size()) {
 
-                    ArrayList<Thread> deadThreads = new ArrayList<>();
-                    for (Thread workerThread : workerThreads) {
-                        if (!workerThread.isAlive())
-                            deadThreads.add(workerThread);
-                    }
+                    ArrayList<Thread> deadThreads = getDeadThreads(workerThreads);
 
                     if (!deadThreads.isEmpty()) {
                         workerThreads.removeAll(deadThreads);
@@ -87,9 +84,34 @@ public class Main {
             }
         }
 
+        while (!workerThreads.isEmpty()) {
+            ArrayList<Thread> deadThreads = getDeadThreads(workerThreads);
+            if (!deadThreads.isEmpty()) {
+                workerThreads.removeAll(deadThreads);
+            } else {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+
         Stopwatch.setEndTime();
 
         System.out.println("Time to ingest: " + Stopwatch.getTime());
+    }
+
+    @NotNull
+    private static ArrayList<Thread> getDeadThreads(List<Thread> workerThreads) {
+        ArrayList<Thread> deadThreads = new ArrayList<>();
+        for (Thread workerThread : workerThreads) {
+            if (!workerThread.isAlive())
+                deadThreads.add(workerThread);
+        }
+        return deadThreads;
     }
 
 
