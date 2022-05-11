@@ -19,7 +19,6 @@ public class Main {
     private static final List<String> recordBatch = new ArrayList<>();
 
     private static String delimiter;
-    private static final Map<String, String> filePathNameMap = new HashMap<>();
     private static WriteApiBlocking writeApi;
 
 
@@ -62,6 +61,7 @@ public class Main {
 
 
     private static void writeCsvDataToInfluxDB(List<File> csvFiles) {
+        int id = 0;
         for (File file : csvFiles){
             if (!file.exists()){
                 System.out.println("File: " + file.getAbsolutePath() + " does not exist");
@@ -69,26 +69,26 @@ public class Main {
             }
 
             try {
-                readFileToInflux(file);
+                readFileToInflux(file, id);
+                System.out.println("File: " + file.getAbsolutePath() + " assigned id: " + id);
             } catch (Exception e){
                 System.out.println("Error reading file: " + file.getAbsolutePath() + e.getMessage());
             }
+            id++;
         }
     }
 
 
-    private static void readFileToInflux(File file) throws Exception {
+    private static void readFileToInflux(File file, int id) throws Exception {
         FileReader fileReader = new FileReader(file);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-        String measurement = filePathNameMap.get(file.getAbsolutePath());
 
         String fileLine;
         // Run through file
         while ((fileLine = bufferedReader.readLine()) != null){
             String[] splitLine = fileLine.split(delimiter);
             if (splitLine.length == 2){
-                writeDataPointToInflux(measurement, splitLine[0].trim(), splitLine[1].trim());
+                writeDataPointToInflux(Integer.toString(id), splitLine[0].trim(), splitLine[1].trim());
             } else {
                 writeDataPointToInflux(splitLine[0].trim(), splitLine[1].trim(), splitLine[2].trim());
             }
@@ -125,7 +125,6 @@ public class Main {
             if (file.isDirectory()){
                 csvFiles.addAll(getCsvFiles(file, filePath + "/" + file.getName()));
             } else if (file.isFile()) {
-                filePathNameMap.put(file.getAbsolutePath(), filePath + "/" + file.getName());
                 csvFiles.add(file);
             }
         }
